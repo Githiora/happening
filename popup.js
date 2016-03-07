@@ -122,10 +122,10 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
   });*/
 
 }
-function getEvents() {
+function getEvents(lat, long) {
   /*var searchUrl = 'https://ajax.googleapis.com/ajax/services/search/images' +
       '?v=1.0&q=' + encodeURIComponent(searchTerm);*/
-  var searchUrl = 'https://www.eventbriteapi.com/v3/users/me/?token=2QV6ZWXHUFWULSULYHQL';
+  var searchUrl = 'https://www.eventbriteapi.com/v3//events/search/?token=2QV6ZWXHUFWULSULYHQL&location.latitude='+lat+'&location.longitude='+long;
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
   x.send();
@@ -154,10 +154,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var geoSuccess = function(position) {
       startPos = position;
-      console.log("latitude=" + position.coords.latitude +
-          ", longitude=" + position.coords.longitude);
+      var latitude = position.coords.latitude;
+      var long = position.coords.longitude;
+      console.log("latitude=" + latitude +
+          ", longitude=" + long);
 
-      getEvents();
+      getEvents(latitude, long);
     };
     var geoError = function(position) {
       console.log('Error occurred. Error code: ' + error.code);
