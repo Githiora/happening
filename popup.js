@@ -112,17 +112,62 @@ function renderStatus(statusText) {
   document.getElementById('status').textContent = statusText;
 }
 
+function getUsersLocation(geoSuccess, geoError, geoOptions){
+
+  navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
+
+  /*navigator.geolocation.getCurrentPosition(function(position) {
+    console.log("latitude=" + position.coords.latitude +
+        ", longitude=" + position.coords.longitude);
+  });*/
+
+}
+function getEvents() {
+  /*var searchUrl = 'https://ajax.googleapis.com/ajax/services/search/images' +
+      '?v=1.0&q=' + encodeURIComponent(searchTerm);*/
+  var searchUrl = 'https://www.eventbriteapi.com/v3/users/me/?token=2QV6ZWXHUFWULSULYHQL';
+  var x = new XMLHttpRequest();
+  x.open('GET', searchUrl);
+  x.send();
+
+  // The Google image search API responds with JSON, so let Chrome parse it.
+  x.onreadystatechange = function() {
+    if (x.readyState == 4 && x.status == 200) {
+      var myArr = JSON.parse(x.responseText);
+      //myFunction(myArr);
+      console.log(myArr);
+    }
+  };
+}
 document.addEventListener('DOMContentLoaded', function() {
 
   // check for Geolocation support
   if (navigator.geolocation) {
     console.log('Geolocation is supported!');
 
-    navigator.geolocation.getCurrentPosition(function(position) {
+    var startPos;
+    var geoOptions = {
+      maximumAge: 5 * 60 * 1000,
+      timeout: 10 * 1000
+    }
+
+
+    var geoSuccess = function(position) {
+      startPos = position;
       console.log("latitude=" + position.coords.latitude +
           ", longitude=" + position.coords.longitude);
-    });
 
+      getEvents();
+    };
+    var geoError = function(position) {
+      console.log('Error occurred. Error code: ' + error.code);
+      // error.code can be:
+      //   0: unknown error
+      //   1: permission denied
+      //   2: position unavailable (error response from location provider)
+      //   3: timed out
+    };
+    getUsersLocation(geoSuccess, geoError, geoOptions);
   }
   else {
     console.log('Geolocation is not supported for this Browser/OS version yet.');
