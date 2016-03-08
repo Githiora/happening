@@ -79,7 +79,7 @@ function getImageUrl(searchTerm, callback, errorCallback) {
     var height = parseInt(firstResult.tbHeight);
     console.assert(
         typeof imageUrl == 'string' && !isNaN(width) && !isNaN(height),
-        'Unexpected respose from the Google Image Search API!');
+        'Unexpected response from the Google Image Search API!');
     callback(imageUrl, width, height);
   };
   x.onerror = function() {
@@ -87,25 +87,6 @@ function getImageUrl(searchTerm, callback, errorCallback) {
   };
   x.send();
 }
-
-/*chrome.runtime.onMessage.addListener (
-    function (request, sender, sendResponse) {
-
-      if (request.command == "gimmeGimme") {
-
-        navigator.geolocation.getCurrentPosition (function (position) {
-          sendResponse ( {
-            geoLocation: (
-                "latitude="    + position.coords.latitude
-                + ", longitude=" + position.coords.longitude
-            )
-          } );
-        } );
-        return true; // Needed because the response is asynchronous
-      }
-    }
-);*/
-
 
 
 function renderStatus(statusText) {
@@ -116,31 +97,50 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
 
   navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
 
-  /*navigator.geolocation.getCurrentPosition(function(position) {
-    console.log("latitude=" + position.coords.latitude +
-        ", longitude=" + position.coords.longitude);
-  });*/
+}
+function makeUL(myArr) {
+  // Create the list element:
+  var list = document.createElement('ul');
 
+  for(var i = 0; i < myArr.length; i++) {
+    // Create the list item:
+    var item = document.createElement('li');
+
+    // Set its contents:
+    item.appendChild(document.createTextNode(myArr[i]));
+
+    // Add it to the list:
+    list.appendChild(item);
+  }
+
+  // Finally, return the constructed list:
+  return list;
 }
 function getEvents(lat, long) {
-  /*var searchUrl = 'https://ajax.googleapis.com/ajax/services/search/images' +
-      '?v=1.0&q=' + encodeURIComponent(searchTerm);*/
   var searchUrl = 'https://www.eventbriteapi.com/v3//events/search/?token=2QV6ZWXHUFWULSULYHQL&location.latitude' +
       '='+lat+'&location.longitude='+long+'&popular=true';
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
-  x.send();
 
-  // The Google image search API responds with JSON, so let Chrome parse it.
-  x.onreadystatechange = function() {
+  x.onload = function() {
     if (x.readyState == 4 && x.status == 200) {
       var myArr = JSON.parse(x.responseText);
+      var arr2 = [];
+      for(var i=0; i < 10; i++){
+        arr2[i] = myArr.events[i].name.text;
+      }
       //myFunction(myArr);
-      console.log(myArr);
+      //console.log(arr2);
+      renderStatus("Popular events near you");
+     document.getElementById('status').appendChild(makeUL(arr2));
     }
   };
+  x.send();
 }
+
 document.addEventListener('DOMContentLoaded', function() {
+
+  renderStatus("Loading...")
 
   // check for Geolocation support
   if (navigator.geolocation) {
@@ -152,8 +152,8 @@ document.addEventListener('DOMContentLoaded', function() {
       timeout: 10 * 1000
     }
 
-
     var geoSuccess = function(position) {
+
       startPos = position;
       var latitude = position.coords.latitude;
       var long = position.coords.longitude;
@@ -175,26 +175,4 @@ document.addEventListener('DOMContentLoaded', function() {
   else {
     console.log('Geolocation is not supported for this Browser/OS version yet.');
   }
-  getCurrentTabUrl(function(url) {
-    // Put the image URL in Google search.
-    renderStatus('Performing Google Image search for ' + url);
-
-    getImageUrl(url, function(imageUrl, width, height) {
-
-      renderStatus('Search term: ' + url + '\n' +
-          'Google image search result: ' + imageUrl);
-      var imageResult = document.getElementById('image-result');
-      // Explicitly set the width/height to minimize the number of reflows. For
-      // a single image, this does not matter, but if you're going to embed
-      // multiple external images in your page, then the absence of width/height
-      // attributes causes the popup to resize multiple times.
-      imageResult.width = width;
-      imageResult.height = height;
-      imageResult.src = imageUrl;
-      imageResult.hidden = false;
-
-    }, function(errorMessage) {
-      renderStatus('Cannot display image. ' + errorMessage);
-    });
-  });
 });

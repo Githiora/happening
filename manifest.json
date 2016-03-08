@@ -16,7 +16,7 @@
     "geolocation"
   ],
   "content_scripts": [{
-    "js": ["popup.js"],
+    "js": ["popup.js", "jquery-1.12.1.js"],
     "matches":["<all_urls>"]
   }]
 }
