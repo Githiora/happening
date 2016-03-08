@@ -98,12 +98,10 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
   navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
 
 }
-function func() {
-  alert("clicked");
-}
+
 function makeUL(myArr) {
   // Create the list element:
-  var list = document.createElement('ul');
+  var list = document.getElementById('list');
 
   list.addEventListener('click', function(e) {
     if (e.target.tagName === 'LI'){
@@ -115,6 +113,7 @@ function makeUL(myArr) {
   for(var i = 0; i < myArr.length; i++) {
     // Create the list item:
     var item = document.createElement('li');
+    item.style.marginBottom = '10px';
     item.href = myArr[i].url;
 
     // Set its contents:
@@ -125,7 +124,7 @@ function makeUL(myArr) {
   }
 
   // Finally, return the constructed list:
-  return list;
+ // return list;
 }
 function getEvents(lat, long) {
   var searchUrl = 'https://www.eventbriteapi.com/v3//events/search/?token=2QV6ZWXHUFWULSULYHQL&location.latitude' +
@@ -142,8 +141,10 @@ function getEvents(lat, long) {
       }
       //myFunction(myArr);
       console.log(myArr);
-      renderStatus("Popular events near you");
-     document.getElementById('status').appendChild(makeUL(arr2));
+      renderStatus("Popular events near you. Click to view event");
+
+      makeUL(arr2);
+    // document.getElementById('status').appendChild(makeUL(arr2));
       var elem = document.getElementById('view_more');
       elem.hidden = false;
       elem.onclick = RunClick;
