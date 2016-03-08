@@ -6,9 +6,13 @@
   "version": "1.0",
 
   "browser_action": {
-    "default_icon": "icon.png",
+    "default_icon": {
+      "16":"happening16.png",
+      "48":"happening48.png",
+      "128":"happening128.png"
+    },
     "default_popup": "popup.html",
-    "default_title":"Click here man!"
+    "default_title":"Popular events near me"
   },
   "permissions": [
     "activeTab",
@@ -18,5 +22,10 @@
   "content_scripts": [{
     "js": ["popup.js", "jquery-1.12.1.js"],
     "matches":["<all_urls>"]
-  }]
+  }],
+  "icons":{
+    "16":"happening16.png",
+    "48":"happening48.png",
+    "128":"happening128.png"
+  }
 }

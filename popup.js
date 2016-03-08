@@ -99,16 +99,12 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
 
 }
 
-function changeBackgroundColor(item) {
-  item.style.backgroundColor = 'yellow';
-}
 function makeUL(myArr) {
   // Create the list element:
   var list = document.getElementById('list');
 
   list.addEventListener('click', function(e) {
     if (e.target.tagName === 'LI'){
-      //alert(e.target.href);  // Check if the element is a LI
       window.open(e.target.href);
     }
   });
@@ -157,6 +153,7 @@ function getEvents(lat, long) {
     // document.getElementById('status').appendChild(makeUL(arr2));
       var elem = document.getElementById('view_more');
       elem.hidden = false;
+     // elem.style.cursor = 'pointer';
       elem.onclick = RunClick;
 
     }

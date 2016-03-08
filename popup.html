@@ -17,12 +17,14 @@
         white-space: pre;
         text-overflow: ellipsis;
         max-width: 400px;
-        overflow-wrap: break-word;
+        overflow-wrap: normal;
 
       }
       #list{
         list-style: none;
-
+      }
+      #view_more{
+        cursor: pointer;
       }
 
     </style>
@@ -37,9 +39,7 @@
   </head>
   <body>
     <div id="status"></div>
-    <ul id="list">
-
-    </ul>
+    <ul id="list"></ul>
 
     <div id="view_more" hidden>View More...</div>
     <img id="image-result" hidden>
