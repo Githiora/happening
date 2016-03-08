@@ -144,11 +144,18 @@ function getEvents(lat, long) {
       console.log(myArr);
       renderStatus("Popular events near you");
      document.getElementById('status').appendChild(makeUL(arr2));
+      var elem = document.getElementById('view_more');
+      elem.hidden = false;
+      elem.onclick = RunClick;
+
     }
   };
   x.send();
 }
 
+function RunClick(){
+  window.open('https://www.eventbrite.com/');
+}
 document.addEventListener('DOMContentLoaded', function() {
 
   renderStatus("Loading...");
