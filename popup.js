@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+var constants = {
+  EVENTBRITE_WEBSITE : 'https://www.eventbrite.com/',
+  EVENTBRITE_SEARCH_EVENTS_URL:'https://www.eventbriteapi.com/v3//events/search/',
+  EVENTBRITE_ACCESS_TOKEN:'2QV6ZWXHUFWULSULYHQL',
+  STATUS_OK:200,
+
+  // number of events from Eventbrite API. Should not be greater than 50
+  EVENTS_NUM : 10
+}
 /**
  * Get the current URL.
  *
@@ -109,21 +118,22 @@ function makeUL(myArr) {
     }
   });
 
-  for(var i = 0; i < myArr.length; i++) {
+  for(var i = 0; i < constants.EVENTS_NUM; i++) {
     // Create the list item:
     var item = document.createElement('li');
     item.style.marginBottom = '10px';
+    item.style.marginLeft = '0px';
     item.style.cursor = 'pointer';
     item.addEventListener('mouseover', function(e){
-      e.srcElement.style.backgroundColor = 'yellow';
+      e.srcElement.style.backgroundColor = 'bisque';
     });
     item.addEventListener('mouseout', function (e) {
       e.srcElement.style.background = 'white';
     });
-    item.href = myArr[i].url;
+    item.href = myArr[i].events.url;
 
     // Set its contents:
-    item.appendChild(document.createTextNode(myArr[i].name.text));
+    item.appendChild(document.createTextNode(myArr[i].events.name.text));
 
     // Add it to the list:
     list.appendChild(item);
@@ -133,16 +143,16 @@ function makeUL(myArr) {
  // return list;
 }
 function getEvents(lat, long) {
-  var searchUrl = 'https://www.eventbriteapi.com/v3//events/search/?token=2QV6ZWXHUFWULSULYHQL&location.latitude' +
+  var searchUrl = constants.EVENTBRITE_SEARCH_EVENTS_URL +'?token='+constants.EVENTBRITE_ACCESS_TOKEN+'&location.latitude' +
       '='+lat+'&location.longitude='+long+'&popular=true';
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
 
   x.onload = function() {
-    if (x.readyState == 4 && x.status == 200) {
+    if (x.readyState == 4 && x.status == constants.STATUS_OK) {
       var myArr = JSON.parse(x.responseText);
       var arr2 = [];
-      for(var i=0; i < 10; i++){
+      for(var i=0; i < constants.EVENTS_NUM; i++){
         arr2[i] = myArr.events[i];
       }
       //myFunction(myArr);
@@ -162,7 +172,7 @@ function getEvents(lat, long) {
 }
 
 function RunClick(){
-  window.open('https://www.eventbrite.com/');
+  window.open(constants.EVENTBRITE_WEBSITE);
 }
 document.addEventListener('DOMContentLoaded', function() {
 
