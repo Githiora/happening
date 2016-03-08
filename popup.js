@@ -125,7 +125,8 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
 function getEvents(lat, long) {
   /*var searchUrl = 'https://ajax.googleapis.com/ajax/services/search/images' +
       '?v=1.0&q=' + encodeURIComponent(searchTerm);*/
-  var searchUrl = 'https://www.eventbriteapi.com/v3//events/search/?token=2QV6ZWXHUFWULSULYHQL&location.latitude='+lat+'&location.longitude='+long;
+  var searchUrl = 'https://www.eventbriteapi.com/v3//events/search/?token=2QV6ZWXHUFWULSULYHQL&location.latitude' +
+      '='+lat+'&location.longitude='+long+'&popular=true';
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
   x.send();
