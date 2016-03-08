@@ -99,6 +99,9 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
 
 }
 
+function changeBackgroundColor(item) {
+  item.style.backgroundColor = 'yellow';
+}
 function makeUL(myArr) {
   // Create the list element:
   var list = document.getElementById('list');
@@ -114,6 +117,13 @@ function makeUL(myArr) {
     // Create the list item:
     var item = document.createElement('li');
     item.style.marginBottom = '10px';
+    item.style.cursor = 'pointer';
+    item.addEventListener('mouseover', function(e){
+      e.srcElement.style.backgroundColor = 'yellow';
+    });
+    item.addEventListener('mouseout', function (e) {
+      e.srcElement.style.background = 'white';
+    });
     item.href = myArr[i].url;
 
     // Set its contents:
