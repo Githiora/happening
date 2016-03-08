@@ -98,16 +98,27 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
   navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
 
 }
+function func() {
+  alert("clicked");
+}
 function makeUL(myArr) {
   // Create the list element:
   var list = document.createElement('ul');
 
+  list.addEventListener('click', function(e) {
+    if (e.target.tagName === 'LI'){
+      //alert(e.target.href);  // Check if the element is a LI
+      window.open(e.target.href);
+    }
+  });
+
   for(var i = 0; i < myArr.length; i++) {
     // Create the list item:
     var item = document.createElement('li');
+    item.href = myArr[i].url;
 
     // Set its contents:
-    item.appendChild(document.createTextNode(myArr[i]));
+    item.appendChild(document.createTextNode(myArr[i].name.text));
 
     // Add it to the list:
     list.appendChild(item);
@@ -127,10 +138,10 @@ function getEvents(lat, long) {
       var myArr = JSON.parse(x.responseText);
       var arr2 = [];
       for(var i=0; i < 10; i++){
-        arr2[i] = myArr.events[i].name.text;
+        arr2[i] = myArr.events[i];
       }
       //myFunction(myArr);
-      //console.log(arr2);
+      console.log(myArr);
       renderStatus("Popular events near you");
      document.getElementById('status').appendChild(makeUL(arr2));
     }
@@ -140,7 +151,7 @@ function getEvents(lat, long) {
 
 document.addEventListener('DOMContentLoaded', function() {
 
-  renderStatus("Loading...")
+  renderStatus("Loading...");
 
   // check for Geolocation support
   if (navigator.geolocation) {
@@ -157,13 +168,14 @@ document.addEventListener('DOMContentLoaded', function() {
       startPos = position;
       var latitude = position.coords.latitude;
       var long = position.coords.longitude;
-      console.log("latitude=" + latitude +
-          ", longitude=" + long);
+      /*console.log("latitude=" + latitude +
+          ", longitude=" + long);*/
 
       getEvents(latitude, long);
     };
     var geoError = function(position) {
-      console.log('Error occurred. Error code: ' + error.code);
+      //TODO error code undefined
+      console.log('Error occurred. Error code: ' + position);
       // error.code can be:
       //   0: unknown error
       //   1: permission denied
