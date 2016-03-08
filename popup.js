@@ -11,50 +11,6 @@ var constants = {
   // number of events from Eventbrite API. Should not be greater than 50
   EVENTS_NUM : 10
 }
-/**
- * Get the current URL.
- *
- * @param {function(string)} callback - called when the URL of the current tab
- *   is found.
- */
-function getCurrentTabUrl(callback) {
-  // Query filter to be passed to chrome.tabs.query - see
-  // https://developer.chrome.com/extensions/tabs#method-query
-  var queryInfo = {
-    active: true,
-    currentWindow: true
-  };
-
-  chrome.tabs.query(queryInfo, function(tabs) {
-    // chrome.tabs.query invokes the callback with a list of tabs that match the
-    // query. When the popup is opened, there is certainly a window and at least
-    // one tab, so we can safely assume that |tabs| is a non-empty array.
-    // A window can only have one active tab at a time, so the array consists of
-    // exactly one tab.
-    var tab = tabs[0];
-
-    // A tab is a plain object that provides information about the tab.
-    // See https://developer.chrome.com/extensions/tabs#type-Tab
-    var url = tab.url;
-
-    // tab.url is only available if the "activeTab" permission is declared.
-    // If you want to see the URL of other tabs (e.g. after removing active:true
-    // from |queryInfo|), then the "tabs" permission is required to see their
-    // "url" properties.
-    console.assert(typeof url == 'string', 'tab.url should be a string');
-
-    callback(url);
-  });
-
-  // Most methods of the Chrome extension APIs are asynchronous. This means that
-  // you CANNOT do something like this:
-  //
-  // var url;
-  // chrome.tabs.query(queryInfo, function(tabs) {
-  //   url = tabs[0].url;
-  // });
-  // alert(url); // Shows "undefined", because chrome.tabs.query is async.
-}
 
 /**
  * @param {string} searchTerm - Search term for Google Image search.
@@ -97,21 +53,35 @@ function getImageUrl(searchTerm, callback, errorCallback) {
   x.send();
 }
 
-
+/**
+ * Display current status of extension
+ * @param statusText - string value to be printed
+ */
 function renderStatus(statusText) {
   document.getElementById('status').textContent = statusText;
 }
 
+/**
+ * Get the user's location
+ * @param geoSuccess - Callback function when location coords are obtained
+ * @param geoError - Optional callback when location coords are not obtained
+ * @param geoOptions - Optional callback for specifying constraints such as timeout
+ */
 function getUsersLocation(geoSuccess, geoError, geoOptions){
 
   navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
 
 }
 
+/**
+ * Dynamically create unordered list of events for display. Items limited to value of EVENTS_NUM
+ * @param myArr - Array containing events objects retrieved from Eventbrite
+ */
 function makeUL(myArr) {
   // Create the list element:
   var list = document.getElementById('list');
 
+  // navigate to event page on click
   list.addEventListener('click', function(e) {
     if (e.target.tagName === 'LI'){
       window.open(e.target.href);
@@ -124,25 +94,29 @@ function makeUL(myArr) {
     item.style.marginBottom = '10px';
     item.style.marginLeft = '0px';
     item.style.cursor = 'pointer';
+
+    //change color of item when mouse moves over it
     item.addEventListener('mouseover', function(e){
       e.srcElement.style.backgroundColor = 'bisque';
     });
+
+    //revert to previous color after moving over item
     item.addEventListener('mouseout', function (e) {
       e.srcElement.style.background = 'white';
     });
-    item.href = myArr[i].events.url;
+
+    // set link for navigating to event on click
+    item.href = myArr.events[i].url;
 
     // Set its contents:
-    item.appendChild(document.createTextNode(myArr[i].events.name.text));
+    item.appendChild(document.createTextNode(myArr.events[i].name.text));
 
     // Add it to the list:
     list.appendChild(item);
   }
-
-  // Finally, return the constructed list:
- // return list;
 }
 function getEvents(lat, long) {
+
   var searchUrl = constants.EVENTBRITE_SEARCH_EVENTS_URL +'?token='+constants.EVENTBRITE_ACCESS_TOKEN+'&location.latitude' +
       '='+lat+'&location.longitude='+long+'&popular=true';
   var x = new XMLHttpRequest();
@@ -150,28 +124,23 @@ function getEvents(lat, long) {
 
   x.onload = function() {
     if (x.readyState == 4 && x.status == constants.STATUS_OK) {
-      var myArr = JSON.parse(x.responseText);
-      var arr2 = [];
-      for(var i=0; i < constants.EVENTS_NUM; i++){
-        arr2[i] = myArr.events[i];
-      }
-      //myFunction(myArr);
-      console.log(myArr);
+      var events = JSON.parse(x.responseText);
+
+      console.log(events);
       renderStatus("Popular events near you. Click to view event");
 
-      makeUL(arr2);
-    // document.getElementById('status').appendChild(makeUL(arr2));
+      makeUL(events);
+
       var elem = document.getElementById('view_more');
       elem.hidden = false;
-     // elem.style.cursor = 'pointer';
-      elem.onclick = RunClick;
+      elem.onclick = openEventbriteWebsite;
 
     }
   };
   x.send();
 }
 
-function RunClick(){
+function openEventbriteWebsite(){
   window.open(constants.EVENTBRITE_WEBSITE);
 }
 document.addEventListener('DOMContentLoaded', function() {
@@ -184,32 +153,51 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var startPos;
     var geoOptions = {
+
+      // get cached location in milliseconds
       maximumAge: 5 * 60 * 1000,
+
+      // timeout value in milliseconds
       timeout: 10 * 1000
-    }
+    };
 
     var geoSuccess = function(position) {
 
       startPos = position;
       var latitude = position.coords.latitude;
       var long = position.coords.longitude;
-      /*console.log("latitude=" + latitude +
-          ", longitude=" + long);*/
 
       getEvents(latitude, long);
     };
-    var geoError = function(position) {
+    var geoError = function error(err) {
       //TODO error code undefined
-      console.log('Error occurred. Error code: ' + position);
+      console.log('Error occurred. Error code: ' + err.message);
+
       // error.code can be:
       //   0: unknown error
       //   1: permission denied
       //   2: position unavailable (error response from location provider)
       //   3: timed out
+
+      switch (err.code){
+        case err.UNKNOWN_ERR:
+              renderStatus("Error unknown. Please try again later");
+              break;
+        case err.PERMISSION_DENIED:
+              renderStatus("Please allow location services to view events");
+              break;
+        case err.POSITION_UNAVAILABLE:
+              renderStatus("Unable to get position. Please try again later");
+              break;
+        case err.TIMEOUT:
+              renderStatus("Timed out. Please try again later");
+              break;
+      }
     };
     getUsersLocation(geoSuccess, geoError, geoOptions);
   }
   else {
     console.log('Geolocation is not supported for this Browser/OS version yet.');
+    renderStatus("Unable to get location. Location services not supported");
   }
 });
