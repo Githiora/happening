@@ -10,7 +10,7 @@ var constants = {
 
   // number of events from Eventbrite API. Should not be greater than 50
   EVENTS_NUM : 10
-}
+};
 
 /**
  * @param {string} searchTerm - Search term for Google Image search.
@@ -77,7 +77,8 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
  * Dynamically create unordered list of events for display. Items limited to value of EVENTS_NUM
  * @param myArr - Array containing events objects retrieved from Eventbrite
  */
-function makeUL(myArr) {
+function createUnorderedList(myArr) {
+
   // Create the list element:
   var list = document.getElementById('list');
 
@@ -129,12 +130,15 @@ function getEvents(lat, long) {
       console.log(events);
       renderStatus("Popular events near you. Click to view event");
 
-      makeUL(events);
+      createUnorderedList(events);
 
       var elem = document.getElementById('view_more');
       elem.hidden = false;
       elem.onclick = openEventbriteWebsite;
 
+    }else{ // Error occurred
+      console.log("XMLHttpRequest error: "+ x.statusText);
+      renderStatus("Unable to get events. Please try again later");
     }
   };
   x.send();
@@ -151,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (navigator.geolocation) {
     console.log('Geolocation is supported!');
 
-    var startPos;
     var geoOptions = {
 
       // get cached location in milliseconds
@@ -163,14 +166,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var geoSuccess = function(position) {
 
-      startPos = position;
       var latitude = position.coords.latitude;
       var long = position.coords.longitude;
 
       getEvents(latitude, long);
     };
     var geoError = function error(err) {
-      //TODO error code undefined
       console.log('Error occurred. Error code: ' + err.message);
 
       // error.code can be:
