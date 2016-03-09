@@ -1,21 +1,87 @@
 
-var constants = {
-  EVENTBRITE_WEBSITE : 'https://www.eventbrite.com/',
-  EVENTBRITE_SEARCH_EVENTS_URL:'https://www.eventbriteapi.com/v3//events/search/',
-  EVENTBRITE_ACCESS_TOKEN:'BKKRDKVUVRC5WG4HAVLT',
-  STATUS_OK:200,
+// global object containing configuration items for easier modification and access
+happening = function(){
+  var config = {
+    EVENTBRITE:{
 
-  // number of events from Eventbrite API. Should not be greater than 50
-  EVENTS_NUM : 10
-};
+      EVENTBRITE_WEBSITE : 'https://www.eventbrite.com/',
+      EVENTBRITE_SEARCH_EVENTS_URL:'https://www.eventbriteapi.com/v3/events/search/',
+      EVENTBRITE_ACCESS_TOKEN: '2QV6ZWXHUFWULSULYHQL',
+
+      // number of events from Eventbrite API. Should not be greater than 50
+      EVENTS_NUM : 10
+    },
+    CSS:{
+      IDs:{
+        status:'status',
+        list:'list',
+        view_more: 'view_more'
+      }
+    }
+  };
+  return{
+    config:config
+  }
+}();
 
 /**
- * Display current status of extension
- * @param statusText - string value to be printed
+ * Called when the initial HTML document has been completely loaded and parsed
  */
-function renderStatus(statusText) {
-  document.getElementById('status').textContent = statusText;
-}
+document.addEventListener('DOMContentLoaded', function() {
+
+  renderStatus("Loading...");
+
+  // check for Geolocation support
+  if (navigator.geolocation) {
+    console.log('Geolocation is supported!');
+
+    var geoOptions = {
+
+      // get cached location in milliseconds
+      maximumAge: 5 * 60 * 1000,
+
+      // timeout value in milliseconds
+      timeout: 5 * 1000
+    };
+
+    var geoSuccess = function(position) {
+
+      var latitude = position.coords.latitude;
+      var long = position.coords.longitude;
+
+      getEvents(latitude, long);
+    };
+    var geoError = function error(err) {
+      console.log('Error occurred. Error code: ' + err.message);
+
+      // error.code can be:
+      //   0: unknown error
+      //   1: permission denied
+      //   2: position unavailable (error response from location provider)
+      //   3: timed out
+
+      switch (err.code){
+        case err.UNKNOWN_ERR:
+          renderStatus("Error unknown. Please try again later");
+          break;
+        case err.PERMISSION_DENIED:
+          renderStatus("Please allow location services to view events");
+          break;
+        case err.POSITION_UNAVAILABLE:
+          renderStatus("Unable to get position. Please try again later");
+          break;
+        case err.TIMEOUT:
+          renderStatus("Timed out. Please try again later");
+          break;
+      }
+    };
+    getUsersLocation(geoSuccess, geoError, geoOptions);
+  }
+  else {
+    console.log('Geolocation is not supported for this Browser/OS version yet.');
+    renderStatus("Unable to get location. Location services not supported");
+  }
+});
 
 /**
  * Get the user's location
@@ -25,8 +91,54 @@ function renderStatus(statusText) {
  */
 function getUsersLocation(geoSuccess, geoError, geoOptions){
 
+  "use strict";
   navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
 
+}
+
+function getEvents(lat, long) {
+
+  // searching events that are near the user, are popular and are happening on the coming weekend
+  var searchUrl = happening.config.EVENTBRITE.EVENTBRITE_SEARCH_EVENTS_URL +'?token='+happening.config.EVENTBRITE
+          .EVENTBRITE_ACCESS_TOKEN +'&location.latitude='+lat+'&location.longitude='
+      +long+'&popular=true&start_date.keyword=this_weekend';
+
+  var x = new XMLHttpRequest();
+  x.open('GET', searchUrl);
+
+  x.onload = function() {
+
+    // 4: request finished and response is ready
+    // 200: OK
+    if (x.readyState == 4 && x.status == 200) {
+      var events = JSON.parse(x.responseText);
+
+      console.log(events);
+      renderStatus("Popular events this weekend near you. Click to view event");
+
+      createUnorderedList(events);
+
+      // Makes "View More" element visible and clickable
+      var elem = document.getElementById(happening.config.CSS.IDs.view_more);
+      elem.hidden = false;
+      elem.onclick = openEventbriteWebsite;
+
+    }else{ // Error occurred
+      console.log("XMLHttpRequest error: "+ x.statusText);
+      renderStatus("Unable to get events. Please try again later");
+    }
+  };
+  x.send();
+}
+
+/**
+ * Display current status of extension
+ * @param statusText - string value to be printed
+ */
+function renderStatus(statusText) {
+
+  "use strict";
+  document.getElementById(happening.config.CSS.IDs.status).textContent = statusText;
 }
 
 /**
@@ -35,30 +147,25 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
  */
 function createUnorderedList(myArr) {
 
+  "use strict";
   // Create the list element:
-  var list = document.getElementById('list');
+  var list = document.getElementById(happening.config.CSS.IDs.list);
 
   // navigate to event page on click
   list.addEventListener('click', function(e) {
-    if (e.target.tagName === 'LI'){
+    if (e.target.tagName === 'li'){
       window.open(e.target.href);
     }
   });
 
-  // ensuring that only 10 or lesser items are created
-  var length = 0;
-  if(myArr.length < 10){
-    length = myArr.length;
-  }else{
-    length = 10;
-  }
+  // ensuring that only 10 (EVENTS_NUM) or lesser items are created for display
+  var length = (myArr.length < happening.config.EVENTBRITE.EVENTS_NUM) ? myArr.length : happening.config.EVENTBRITE.EVENTS_NUM;
 
   for(var i = 0; i < length; i++) {
     // Create the list item:
     var item = document.createElement('li');
-    item.style.marginBottom = '10px';
-    item.style.marginLeft = '0px';
-    item.style.cursor = 'pointer';
+
+    styleItem(item);
 
     //change color of item when mouse moves over it
     item.addEventListener('mouseover', function(e){
@@ -80,90 +187,24 @@ function createUnorderedList(myArr) {
     list.appendChild(item);
   }
 }
-function getEvents(lat, long) {
 
-  // searching events that are near the user, are popular and are happening on the coming weekend
-  var searchUrl = constants.EVENTBRITE_SEARCH_EVENTS_URL +'?token='+constants.EVENTBRITE_ACCESS_TOKEN+'&location.latitude' +
-      '='+lat+'&location.longitude='+long+'&popular=true&start_date.keyword=this_weekend';
-  var x = new XMLHttpRequest();
-  x.open('GET', searchUrl);
+/**
+ * Adds styling to unordered list items
+ * @param item
+ */
+function styleItem(item) {
 
-  x.onload = function() {
-    if (x.readyState == 4 && x.status == constants.STATUS_OK) {
-      var events = JSON.parse(x.responseText);
-
-      console.log(events);
-      renderStatus("Popular events this weekend near you. Click to view event");
-
-      createUnorderedList(events);
-
-      var elem = document.getElementById('view_more');
-      elem.hidden = false;
-      elem.onclick = openEventbriteWebsite;
-
-    }else{ // Error occurred
-      console.log("XMLHttpRequest error: "+ x.statusText);
-      renderStatus("Unable to get events. Please try again later");
-    }
-  };
-  x.send();
+  item.style.marginBottom = '10px';
+  item.style.marginLeft = '0px';
+  item.style.cursor = 'pointer';
 }
 
+
+
+/**
+ * Opens Eventbrite website in case user wants to view more than EVENTS_NUM events
+ */
 function openEventbriteWebsite(){
-  window.open(constants.EVENTBRITE_WEBSITE);
+  window.open(happening.config.EVENTBRITE.EVENTBRITE_WEBSITE);
 }
-document.addEventListener('DOMContentLoaded', function() {
 
-  renderStatus("Loading...");
-
-  // check for Geolocation support
-  if (navigator.geolocation) {
-    console.log('Geolocation is supported!');
-
-    var geoOptions = {
-
-      // get cached location in milliseconds
-      maximumAge: 5 * 60 * 1000,
-
-      // timeout value in milliseconds
-      timeout: 10 * 1000
-    };
-
-    var geoSuccess = function(position) {
-
-      var latitude = position.coords.latitude;
-      var long = position.coords.longitude;
-
-      getEvents(latitude, long);
-    };
-    var geoError = function error(err) {
-      console.log('Error occurred. Error code: ' + err.message);
-
-      // error.code can be:
-      //   0: unknown error
-      //   1: permission denied
-      //   2: position unavailable (error response from location provider)
-      //   3: timed out
-
-      switch (err.code){
-        case err.UNKNOWN_ERR:
-              renderStatus("Error unknown. Please try again later");
-              break;
-        case err.PERMISSION_DENIED:
-              renderStatus("Please allow location services to view events");
-              break;
-        case err.POSITION_UNAVAILABLE:
-              renderStatus("Unable to get position. Please try again later");
-              break;
-        case err.TIMEOUT:
-              renderStatus("Timed out. Please try again later");
-              break;
-      }
-    };
-    getUsersLocation(geoSuccess, geoError, geoOptions);
-  }
-  else {
-    console.log('Geolocation is not supported for this Browser/OS version yet.');
-    renderStatus("Unable to get location. Location services not supported");
-  }
-});
