@@ -164,9 +164,10 @@ function createUnorderedList(myArr) {
       window.open(e.target.href);
     }
   });
-
+  
   // ensuring that only 10 (EVENTS_NUM) or lesser items are created for display
-  var length = (myArr.length < happening.config.EVENTBRITE.EVENTS_NUM) ? myArr.length : happening.config.EVENTBRITE.EVENTS_NUM;
+  var length = (myArr.events.length < happening.config.EVENTBRITE.EVENTS_NUM) ? myArr.events.length :
+      happening.config.EVENTBRITE.EVENTS_NUM;
 
   if(length == 0){ // No events taking place next weekend
     renderStatus("No events taking place near you this coming weekend. Check back soon!");
