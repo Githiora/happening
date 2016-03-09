@@ -89,7 +89,15 @@ function createUnorderedList(myArr) {
     }
   });
 
-  for(var i = 0; i < constants.EVENTS_NUM; i++) {
+  // ensuring that only 10 or lesser items are created
+  var length = 0;
+  if(myArr.length < 10){
+    length = myArr.length;
+  }else{
+    length = 10;
+  }
+
+  for(var i = 0; i < length; i++) {
     // Create the list item:
     var item = document.createElement('li');
     item.style.marginBottom = '10px';
@@ -118,8 +126,9 @@ function createUnorderedList(myArr) {
 }
 function getEvents(lat, long) {
 
+  // searching events that are near the user, are popular and are happening on the coming weekend
   var searchUrl = constants.EVENTBRITE_SEARCH_EVENTS_URL +'?token='+constants.EVENTBRITE_ACCESS_TOKEN+'&location.latitude' +
-      '='+lat+'&location.longitude='+long+'&popular=true';
+      '='+lat+'&location.longitude='+long+'&popular=true&start_date.keyword=this_weekend';
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
 
@@ -128,7 +137,7 @@ function getEvents(lat, long) {
       var events = JSON.parse(x.responseText);
 
       console.log(events);
-      renderStatus("Popular events near you. Click to view event");
+      renderStatus("Popular events this weekend near you. Click to view event");
 
       createUnorderedList(events);
 
