@@ -96,6 +96,12 @@ function getUsersLocation(geoSuccess, geoError, geoOptions){
 
 }
 
+/**
+ * Function that calls the Eventbrite API using a personal token and a list of events near the user that are taking
+ * place during the coming weekend
+ * @param lat - Latitude coordinate provided by user
+ * @param long - Longitude coordinate provided by user
+ */
 function getEvents(lat, long) {
 
   // searching events that are near the user, are popular and are happening on the coming weekend
@@ -111,6 +117,7 @@ function getEvents(lat, long) {
     // 4: request finished and response is ready
     // 200: OK
     if (x.readyState == 4 && x.status == 200) {
+
       var events = JSON.parse(x.responseText);
 
       console.log(events);
@@ -161,30 +168,36 @@ function createUnorderedList(myArr) {
   // ensuring that only 10 (EVENTS_NUM) or lesser items are created for display
   var length = (myArr.length < happening.config.EVENTBRITE.EVENTS_NUM) ? myArr.length : happening.config.EVENTBRITE.EVENTS_NUM;
 
-  for(var i = 0; i < length; i++) {
-    // Create the list item:
-    var item = document.createElement('li');
+  if(length == 0){ // No events taking place next weekend
+    renderStatus("No events taking place near you this coming weekend. Check back soon!");
 
-    styleItem(item);
+  }else {
 
-    //change color of item when mouse moves over it
-    item.addEventListener('mouseover', function(e){
-      e.srcElement.style.backgroundColor = 'bisque';
-    });
+    for(var i = 0; i < length; i++) {
+      // Create the list item:
+      var item = document.createElement('li');
 
-    //revert to previous color after moving over item
-    item.addEventListener('mouseout', function (e) {
-      e.srcElement.style.background = 'white';
-    });
+      styleItem(item);
 
-    // set link for navigating to event on click
-    item.href = myArr.events[i].url;
+      //change color of item when mouse moves over it
+      item.addEventListener('mouseover', function(e){
+        e.srcElement.style.backgroundColor = 'bisque';
+      });
 
-    // Set its contents:
-    item.appendChild(document.createTextNode(myArr.events[i].name.text));
+      //revert to previous color after moving over item
+      item.addEventListener('mouseout', function (e) {
+        e.srcElement.style.background = 'white';
+      });
 
-    // Add it to the list:
-    list.appendChild(item);
+      // set link for navigating to event on click
+      item.href = myArr.events[i].url;
+
+      // Set its contents:
+      item.appendChild(document.createTextNode(myArr.events[i].name.text));
+
+      // Add it to the list:
+      list.appendChild(item);
+    }
   }
 }
 
@@ -198,8 +211,6 @@ function styleItem(item) {
   item.style.marginLeft = '0px';
   item.style.cursor = 'pointer';
 }
-
-
 
 /**
  * Opens Eventbrite website in case user wants to view more than EVENTS_NUM events
