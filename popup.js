@@ -160,11 +160,11 @@ function createUnorderedList(myArr) {
 
   // navigate to event page on click
   list.addEventListener('click', function(e) {
-    if (e.target.tagName === 'li'){
+    if (e.target.tagName === 'LI'){
       window.open(e.target.href);
     }
   });
-  
+
   // ensuring that only 10 (EVENTS_NUM) or lesser items are created for display
   var length = (myArr.events.length < happening.config.EVENTBRITE.EVENTS_NUM) ? myArr.events.length :
       happening.config.EVENTBRITE.EVENTS_NUM;
