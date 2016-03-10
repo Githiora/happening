@@ -17,7 +17,8 @@ happening = function(){
         list:'list',
         view_more: 'view_more',
         btn_Allow:'btnAllow',
-        btn_Block : "btnBlock"
+        btn_Block : "btnBlock",
+        container : 'container'
       }
     }
   };
@@ -27,13 +28,22 @@ happening = function(){
 }();
 
 /**
+ * Removes div element containing buttons for allowing or blocking location oncer user has made
+ * selection
+ */
+function removeButtonContainer(){
+
+  var elem = document.getElementById(happening.config.CSS.IDs.container);
+  elem.parentNode.removeChild(elem);
+}
+/**
  * Called when the initial HTML document has been completely loaded and parsed
  */
 document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById(happening.config.CSS.IDs.btn_Allow).onclick = function(){
-    var elem = document.getElementById("container");
-    document.getElementById('container').parentNode.removeChild(elem);
+
+    removeButtonContainer();
 
     renderStatus("Loading...");
 
@@ -42,10 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById(happening.config.CSS.IDs.btn_Block).onclick = function(){
 
-    renderStatus("Please allow location services to view events near you.");
+    removeButtonContainer();
 
-    var elem = document.getElementById("container");
-    document.getElementById('container').parentNode.removeChild(elem);
+    renderStatus("Please allow location services to view events near you.");
 
   };
 
@@ -93,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
           break;
       }
     };
-  //  getUsersLocation(geoSuccess, geoError, geoOptions);
   }
   else {
     console.log('Geolocation is not supported for this Browser/OS version yet.');
@@ -210,6 +218,12 @@ function createUnorderedList(myArr) {
 
       // set link for navigating to event on click
       item.href = myArr.events[i].url;
+
+      var start = myArr.events[i].start.local;
+      console.log(start);
+
+      var startDate = new Date(start);
+      console.log(startDate.getUTCHours());
 
       // Set its contents:
       item.appendChild(document.createTextNode(myArr.events[i].name.text));
