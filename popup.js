@@ -7,6 +7,7 @@ happening = function(){
       EVENTBRITE_WEBSITE : 'https://www.eventbrite.com/',
       EVENTBRITE_SEARCH_EVENTS_URL:'https://www.eventbriteapi.com/v3/events/search/',
       EVENTBRITE_ACCESS_TOKEN: '2QV6ZWXHUFWULSULYHQL',
+      EVENTBRITE_GET_VENUE : 'https://www.eventbriteapi.com/v3/venues/',
 
       // number of events from Eventbrite API. Should not be greater than 50
       EVENTS_NUM : 10
@@ -133,7 +134,7 @@ function getEvents(lat, long) {
   // searching events that are near the user, are popular and are happening on the coming weekend
   var searchUrl = happening.config.EVENTBRITE.EVENTBRITE_SEARCH_EVENTS_URL +'?token='+happening.config.EVENTBRITE
           .EVENTBRITE_ACCESS_TOKEN +'&location.latitude='+lat+'&location.longitude='
-      +long+'&popular=true&start_date.keyword=this_weekend';
+      +long+'&popular=true&start_date.keyword=this_weekend&expand=venue';
 
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
@@ -204,6 +205,9 @@ function createUnorderedList(myArr) {
       // Create the list item:
       var item = document.createElement('li');
 
+      //var span = document.createElement('span');
+
+
       styleItem(item);
 
       //change color of item when mouse moves over it
@@ -220,13 +224,26 @@ function createUnorderedList(myArr) {
       item.href = myArr.events[i].url;
 
       var start = myArr.events[i].start.local;
+      var end = myArr.events[i].end.local;
       console.log(start);
 
       var startDate = new Date(start);
       console.log(startDate.getUTCHours());
 
+      var startHour = startDate.getUTCHours();
+
+      if(startHour == 0){
+        startHour = "midnight";
+      }else if(startHour == 12){
+        startHour = "noon";
+      }else{
+        startHour = (startHour > 12) ? (startHour - 12) + "pm" : startHour + "am";
+      }
+
+      var venue = myArr.events[i].venue.name;
+      item.innerHTML = myArr.events[i].name.text + "<br \>" + venue + ", "+ startHour;
       // Set its contents:
-      item.appendChild(document.createTextNode(myArr.events[i].name.text));
+     // item.appendChild(span);
 
       // Add it to the list:
       list.appendChild(item);
