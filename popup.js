@@ -15,7 +15,9 @@ happening = function(){
       IDs:{
         status:'status',
         list:'list',
-        view_more: 'view_more'
+        view_more: 'view_more',
+        btn_Allow:'btnAllow',
+        btn_Block : "btnBlock"
       }
     }
   };
@@ -29,7 +31,23 @@ happening = function(){
  */
 document.addEventListener('DOMContentLoaded', function() {
 
-  renderStatus("Loading...");
+  document.getElementById(happening.config.CSS.IDs.btn_Allow).onclick = function(){
+    var elem = document.getElementById("container");
+    document.getElementById('container').parentNode.removeChild(elem);
+
+    renderStatus("Loading...");
+
+    getUsersLocation(geoSuccess, geoError, geoOptions);
+  };
+
+  document.getElementById(happening.config.CSS.IDs.btn_Block).onclick = function(){
+
+    renderStatus("Please allow location services to view events near you.");
+
+    var elem = document.getElementById("container");
+    document.getElementById('container').parentNode.removeChild(elem);
+
+  };
 
   // check for Geolocation support
   if (navigator.geolocation) {
@@ -75,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
           break;
       }
     };
-    getUsersLocation(geoSuccess, geoError, geoOptions);
+  //  getUsersLocation(geoSuccess, geoError, geoOptions);
   }
   else {
     console.log('Geolocation is not supported for this Browser/OS version yet.');

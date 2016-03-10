@@ -30,6 +30,9 @@
         cursor: pointer;
         color: #706968;
       }
+      #container{
+        display: inline-block;
+      }
 
     </style>
 
@@ -42,7 +45,12 @@
     <script src="popup.js"></script>
   </head>
   <body>
-    <div id="status"></div>
+    <div id="status">Happening would like to get your location</div>
+    <div id="container">
+      <button id="btnAllow">Allow</button>
+      <button id="btnBlock">Block</button>
+    </div>
+
     <ul id="list" ></ul>
 
     <div id="view_more" hidden>View More...</div>
