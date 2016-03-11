@@ -176,6 +176,23 @@ function renderStatus(statusText) {
 }
 
 /**
+ * Formats the time to a 12 hr clock format
+ * @param date - Date object
+ * @returns {string} - formatted time
+ * ref - http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
+ */
+function formatAMPM(date) {
+  var hours = date.getUTCHours();
+  var minutes = date.getUTCMinutes();
+  var ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
+  return strTime;
+}
+
+/**
  * Dynamically create unordered list of events for display. Items limited to value of EVENTS_NUM
  * @param myArr - Array containing events objects retrieved from Eventbrite
  */
@@ -205,9 +222,6 @@ function createUnorderedList(myArr) {
       // Create the list item:
       var item = document.createElement('li');
 
-      //var span = document.createElement('span');
-
-
       styleItem(item);
 
       //change color of item when mouse moves over it
@@ -225,25 +239,19 @@ function createUnorderedList(myArr) {
 
       var start = myArr.events[i].start.local;
       var end = myArr.events[i].end.local;
-      console.log(start);
 
       var startDate = new Date(start);
-      console.log(startDate.getUTCHours());
+      var endDate = new Date(end);
 
-      var startHour = startDate.getUTCHours();
+      // getting the start and end time for the event in 12 hr clock format
+      var startHour = formatAMPM(startDate);
+      var endHour = formatAMPM(endDate);
 
-      if(startHour == 0){
-        startHour = "midnight";
-      }else if(startHour == 12){
-        startHour = "noon";
-      }else{
-        startHour = (startHour > 12) ? (startHour - 12) + "pm" : startHour + "am";
-      }
-
+      // getting the venue for the event
       var venue = myArr.events[i].venue.name;
-      item.innerHTML = myArr.events[i].name.text + "<br \>" + venue + ", "+ startHour;
+
       // Set its contents:
-     // item.appendChild(span);
+      item.innerHTML = myArr.events[i].name.text + "<br \>" + venue + ", "+ startHour + " - " + endHour + " (CST)";
 
       // Add it to the list:
       list.appendChild(item);
